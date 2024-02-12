@@ -61,8 +61,6 @@ func Setup(app *fiber.App) {
 				}})
 			})
 
-			// เหลือ google recaptcha
-
 			processRouter.Post("/register", func(c *fiber.Ctx) error {
 				var body dto.UserRegisterBodyRequest
 				if err := c.BodyParser(&body); err != nil {
