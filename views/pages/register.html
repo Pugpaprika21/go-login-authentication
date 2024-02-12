@@ -1,0 +1,103 @@
+{{template "partials/header_main" .}}
+
+<link rel="stylesheet" href="/static/css/main.css?t={{ config.script_time }}">
+<link rel="stylesheet" href="/static/css/register.css?t={{ config.script_time }}">
+
+<div class="container-fluid">
+    <div class="card-main-register" style="margin-top: 100px;">
+        <div class="d-flex justify-content-center">
+            <div class="card card-register shadow-sm" style="width: 30rem;">
+                <div class="card-body">
+                    <p class="card-text text-center" style="text-align: center; font-size: 30px;">{{ config.app_name_html }}</p>
+                    <form id="register-main" method="post">
+                        <input type="hidden" id="register-url" name="registerURL" value="">
+                        <div class="form-floating mb-4 mt-4">
+                            <input type="text" class="form-control" id="username" name="username" placeholder="Username">
+                            <label for="username">Username</label>
+                        </div>
+                        <div class="form-floating mb-4 mt-4">
+                            <input type="text" class="form-control" id="password" name="password" placeholder="Password">
+                            <label for="password">Password</label>
+                        </div>
+                        <div class="form-floating mb-4 mt-4">
+                            <input type="email" class="form-control" id="email" name="email" placeholder="Email">
+                            <label for="email">Email</label>
+                        </div>
+                        <button type="button" class="button btn-register-main btn-register" onclick="onRegister();">Register</button>
+                        <br>
+                        <p class="lh-base text-center" style="margin-top: 30px;">
+                            <a id="back-login-url" href="/web/page/login" class="text-decoration-none">Back to login page</a>
+                        </p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{template "partials/footer_main" .}}
+<script>
+    const baseUrl = "{{ config.base_url }}";
+    const onRegister = () => {
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+        const email = document.getElementById("email").value;
+
+        if (username == "") {
+            Swal.fire({
+                title: "Please fill in username",
+                text: "",
+                icon: "warning",
+                timer: 1000
+            });
+            return;
+        }
+
+        if (password == "") {
+            Swal.fire({
+                title: "Please fill in password",
+                text: "",
+                icon: "warning",
+                timer: 1000
+            });
+            return;
+        }
+
+        if (email == "") {
+            Swal.fire({
+                title: "Please fill in email",
+                text: "",
+                icon: "warning",
+                timer: 1000
+            });
+            return;
+        }
+
+        axios.post(baseUrl + "web/process/register", {
+                username: username,
+                password: password,
+                email: email
+            }).then(res => {
+                if (res.status == 200) {
+                    Swal.fire({
+                        title: "Register Success",
+                        text: "",
+                        icon: "success",
+                        timer: 1000
+                    }).then(() => {
+                        window.location.href = baseUrl + "web/page/login";
+                    });
+                }
+            })
+            .catch(err => {
+                if (err.response.status == 400) {
+                    Swal.fire({
+                        title: err.response.data.error,
+                        text: "",
+                        icon: "error",
+                        timer: 1000
+                    })
+                    return;
+                }
+            })
+    }
+</script>

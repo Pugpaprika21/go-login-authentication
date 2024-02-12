@@ -1,0 +1,66 @@
+package main
+
+import (
+	"log"
+	"strings"
+
+	"github.com/Pugpaprika21/go-fiber/app/db"
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/joho/godotenv"
+)
+
+func main() {
+	app := fiber.New(fiber.Config{
+		Prefork:       true,
+		CaseSensitive: true,
+		StrictRouting: true,
+		ServerHeader:  "Fiber",
+		AppName:       "Test App v1.0.1",
+	})
+
+	app.Use(cors.New(cors.Config{
+		AllowCredentials: true,
+		AllowOrigins:     "*",
+		AllowHeaders:     "X-Requested-With, Content-Type, Accept, Origin, Authorization",
+		AllowMethods: strings.Join([]string{
+			fiber.MethodGet,
+			fiber.MethodPost,
+			fiber.MethodHead,
+			fiber.MethodPut,
+			fiber.MethodDelete,
+			fiber.MethodPatch,
+		}, ","),
+	}))
+
+	app.Use(func(c *fiber.Ctx) error {
+		c.Set("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0")
+		c.Set("Pragma", "no-cache")
+		return c.Next()
+	})
+
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	db.ConnectDB()
+	appRouter(app)
+	log.Fatal(app.Listen(":8080"))
+}
+
+type User struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+func appRouter(app *fiber.App) {
+	app.Get("/", func(c *fiber.Ctx) error {
+		var users []User
+		result := db.Conn.Find(&users)
+		if result.Error != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "ไม่สามารถดึงข้อมูลผู้ใช้ได้"})
+		}
+		return c.JSON(fiber.Map{"message": "ข้อมูลผู้ใช้", "data": users})
+	})
+}

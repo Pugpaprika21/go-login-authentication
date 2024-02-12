@@ -1,0 +1,6 @@
+.card-body,
+.card-login,
+.card-register,
+.form-control {
+    border-radius: 0px;
+}
